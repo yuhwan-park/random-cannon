@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>랜덤 대포</title>
+    <style>
+      .wordElement {
+        font-size: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <form class="form"><input type="text" class="input" /></form>
+    <div class="desc">총 들어간 단어 : 0개</div>
+    <button class="startBtn">Start</button>
+    <button class="nextBtn">Next</button>
+    <button class="resetBtn">Reset</button>
+    <div class="wordElement"></div>
+    <script>
+      const $form = document.querySelector(".form");
+      const $input = document.querySelector(".input");
+      const $wordElement = document.querySelector(".wordElement");
+      const $resetBtn = document.querySelector(".resetBtn");
+      const $nextBtn = document.querySelector(".nextBtn");
+      const $desc = document.querySelector(".desc");
+
+      let words = [];
+      function getWords(value) {
+        const words = value.split(",");
+        return words;
+      }
+
+      function onSubmitForm(event) {
+        event.preventDefault();
+        const value = $input.value;
+        if (!value) {
+          return;
+        }
+
+        words = value.split(",");
+
+        $desc.textContent = `총 들어간 단어 : ${words.length}개`;
+        console.log("words", words);
+        $input.value = "";
+      }
+
+      function onClickNextButton() {
+        const index = Math.floor(Math.random() * words.length);
+        $wordElement.textContent = words[index];
+        words.splice(index, 1);
+
+        $desc.textContent = `총 들어간 단어 : ${words.length}개`;
+      }
+
+      $form.addEventListener("submit", onSubmitForm);
+      $nextBtn.addEventListener("click", onClickNextButton);
+    </script>
+  </body>
+</html>
+
