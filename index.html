@@ -13,50 +13,80 @@
   </head>
   <body>
     <form class="form"><input type="text" class="input" /></form>
-    <div class="desc">총 들어간 단어 : 0개</div>
-    <button class="startBtn">Start</button>
+    <button class="beforeBtn">Before</button>
     <button class="nextBtn">Next</button>
-    <button class="resetBtn">Reset</button>
+    <div><span class="now">0</span>/<span class="total">0</span></div>
     <div class="wordElement"></div>
     <script>
-      const $form = document.querySelector(".form");
-      const $input = document.querySelector(".input");
-      const $wordElement = document.querySelector(".wordElement");
-      const $resetBtn = document.querySelector(".resetBtn");
-      const $nextBtn = document.querySelector(".nextBtn");
-      const $desc = document.querySelector(".desc");
+      const $form = document.querySelector('.form')
+      const $input = document.querySelector('.input')
+      const $wordElement = document.querySelector('.wordElement')
+      const $nextBtn = document.querySelector('.nextBtn')
+      const $beforeBtn = document.querySelector('.beforeBtn')
+      const $now = document.querySelector('.now')
+      const $total = document.querySelector('.total')
 
-      let words = [];
+      let nowValue = 0
+      let passedWords = []
+      let words = []
+
       function getWords(value) {
-        const words = value.split(",");
-        return words;
+        const words = value.split(',')
+        return words
+      }
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[array[i], array[j]] = [array[j], array[i]]
+        }
+        return array
       }
 
       function onSubmitForm(event) {
-        event.preventDefault();
-        const value = $input.value;
+        event.preventDefault()
+        const value = $input.value
         if (!value) {
-          return;
+          return
         }
 
-        words = value.split(",");
-
-        $desc.textContent = `총 들어간 단어 : ${words.length}개`;
-        console.log("words", words);
-        $input.value = "";
+        const wordArray = value.split(',')
+        const shuffled = shuffleArray(wordArray)
+        console.log('shuffled', shuffled)
+        const passed = shuffled.slice().reverse()
+        console.log('passed', passed)
+        passedWords = passed
+        words = shuffled
+        $total.textContent = words.length
+        $input.value = ''
       }
 
       function onClickNextButton() {
-        const index = Math.floor(Math.random() * words.length);
-        $wordElement.textContent = words[index];
-        words.splice(index, 1);
+        if (nowValue >= words.length) {
+          alert('끝')
+          return
+        }
 
-        $desc.textContent = `총 들어간 단어 : ${words.length}개`;
+        const word = words[nowValue]
+        $wordElement.textContent = word
+
+        nowValue += 1
+        $now.textContent = nowValue
       }
 
-      $form.addEventListener("submit", onSubmitForm);
-      $nextBtn.addEventListener("click", onClickNextButton);
+      function onClickBeforeButton() {
+        if (nowValue <= 0) {
+          return
+        }
+        nowValue -= 1
+        const word = passedWords[passedWords.length - nowValue]
+        $wordElement.textContent = word
+        $now.textContent = nowValue
+      }
+
+      $beforeBtn.addEventListener('click', onClickBeforeButton)
+      $form.addEventListener('submit', onSubmitForm)
+      $nextBtn.addEventListener('click', onClickNextButton)
     </script>
   </body>
 </html>
-
