@@ -12,11 +12,16 @@
     </style>
   </head>
   <body>
-    <form class="form"><input type="text" class="input" /></form>
+    <div style="display: flex">
+      <form class="form"><input type="text" class="input" /></form>
+      <label>단어 폰트 사이즈</label>
+      <input type="range" min="15" max="500" value="200" step="1" class="fontSizeRange" />
+    </div>
     <button class="beforeBtn">Before</button>
     <button class="nextBtn">Next</button>
     <div><span class="now">0</span>/<span class="total">0</span></div>
-    <div class="wordElement"></div>
+    <div class="wordElement">단어</div>
+    <a class="link" href="#" target="_blank">현재 단어 네이버 사전에서 검색하기</a>
     <script>
       const $form = document.querySelector('.form')
       const $input = document.querySelector('.input')
@@ -25,10 +30,14 @@
       const $beforeBtn = document.querySelector('.beforeBtn')
       const $now = document.querySelector('.now')
       const $total = document.querySelector('.total')
+      const $fontSizeRange = document.querySelector('.fontSizeRange')
+      const $link = document.querySelector('.link')
 
       let nowValue = 0
       let passedWords = []
       let words = []
+      let fontSize = 200
+      let currentWord = '단어'
 
       function getWords(value) {
         const words = value.split(',')
@@ -41,6 +50,11 @@
           ;[array[i], array[j]] = [array[j], array[i]]
         }
         return array
+      }
+
+      function getWordLink(word) {
+        const encodedWord = encodeURIComponent(word)
+        return `https://ja.dict.naver.com/search.nhn?dicQuery=${encodedWord}&query=${encodedWord}&target=dic&ie=utf8&query_utf=&isOnlyViewEE=`
       }
 
       function onSubmitForm(event) {
@@ -69,7 +83,7 @@
 
         const word = words[nowValue]
         $wordElement.textContent = word
-
+        $link.href = getWordLink(word)
         nowValue += 1
         $now.textContent = nowValue
       }
@@ -81,12 +95,29 @@
         nowValue -= 1
         const word = passedWords[passedWords.length - nowValue]
         $wordElement.textContent = word
+        $link.href = getWordLink(word)
         $now.textContent = nowValue
+      }
+
+      function onClickPlusFontSizeButton() {
+        fontSize += 5
+        $wordElement.style.fontSize = `${fontSize}px`
+      }
+
+      function onClickMinusFontSizeButton() {
+        fontSize -= 5
+        $wordElement.style.fontSize = `${fontSize}px`
+      }
+
+      function onChangeFontSizeRange(event) {
+        const value = event.target.value
+        $wordElement.style.fontSize = `${value}px`
       }
 
       $beforeBtn.addEventListener('click', onClickBeforeButton)
       $form.addEventListener('submit', onSubmitForm)
       $nextBtn.addEventListener('click', onClickNextButton)
+      $fontSizeRange.addEventListener('change', onChangeFontSizeRange)
     </script>
   </body>
 </html>
