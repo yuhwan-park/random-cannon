@@ -166,7 +166,7 @@
           return
         }
 
-        const currentWordIndex = incorrectWords.indexOf(words[nowValue])
+        const currentWordIndex = incorrectWords.indexOf(words[nowValue - 1])
         if (currentWordIndex !== -1) {
           incorrectWords.splice(currentWordIndex, 1)
         }
