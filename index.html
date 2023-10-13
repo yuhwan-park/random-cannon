@@ -142,21 +142,26 @@
           endGame()
           return
         }
-
+        const currentWordIndex = incorrectWords.indexOf(words[nowValue - 1])
+        if (currentWordIndex !== -1) {
+          incorrectWords.splice(currentWordIndex, 1)
+        }
+        console.log('incorrectWords', incorrectWords)
         const word = words[nowValue]
         showNextWord(word)
       }
 
       function onClickIncorrectButton() {
         const currentWord = words[nowValue - 1]
-        incorrectWords.push(currentWord)
-
+        if (incorrectWords.indexOf(currentWord) === -1) {
+          incorrectWords.push(currentWord)
+        }
+        console.log('incorrectWords', incorrectWords)
         if (nowValue >= words.length) {
           endGame()
           return
         }
 
-        console.log('incorrectWords', incorrectWords)
         const word = words[nowValue]
         showNextWord(word)
       }
@@ -166,10 +171,6 @@
           return
         }
 
-        const currentWordIndex = incorrectWords.indexOf(words[nowValue - 1])
-        if (currentWordIndex !== -1) {
-          incorrectWords.splice(currentWordIndex, 1)
-        }
         nowValue -= 1
         const word = passedWords[passedWords.length - nowValue]
         $wordElement.textContent = word
