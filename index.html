@@ -4,8 +4,15 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600&display=swap" rel="stylesheet" />
     <title>랜덤 대포</title>
     <style>
+      body {
+        font-family: 'Noto Serif JP', serif;
+      }
+
       .wordElement {
         font-size: 200px;
       }
@@ -16,9 +23,21 @@
       <form class="form"><input type="text" class="input" /></form>
       <label>단어 폰트 사이즈</label>
       <input type="range" min="15" max="500" value="200" step="1" class="fontSizeRange" />
+      <button class="resetBtn">단어장 리셋</button>
     </div>
-    <button class="beforeBtn">Before</button>
-    <button class="nextBtn">Next</button>
+    <div class="beforeGame">
+      <button class="startBtn">단어장 시작</button>
+    </div>
+    <div class="game" style="display: none">
+      <button class="beforeBtn">이전 단어</button>
+      <button class="correctBtn">정답!</button>
+      <button class="incorrectBtn">오답😫</button>
+    </div>
+
+    <div class="endGameElement" style="display: none">
+      <div class="incorrectList"></div>
+      <button class="restartBtn">오답 단어로 다시하기</button>
+    </div>
     <div><span class="now">0</span>/<span class="total">0</span></div>
     <div class="wordElement">단어</div>
     <a class="link" href="#" target="_blank">현재 단어 네이버 사전에서 검색하기</a>
@@ -26,16 +45,25 @@
       const $form = document.querySelector('.form')
       const $input = document.querySelector('.input')
       const $wordElement = document.querySelector('.wordElement')
-      const $nextBtn = document.querySelector('.nextBtn')
+      const $correctBtn = document.querySelector('.correctBtn')
+      const $incorrectBtn = document.querySelector('.incorrectBtn')
       const $beforeBtn = document.querySelector('.beforeBtn')
       const $now = document.querySelector('.now')
       const $total = document.querySelector('.total')
       const $fontSizeRange = document.querySelector('.fontSizeRange')
       const $link = document.querySelector('.link')
+      const $incorrectList = document.querySelector('.incorrectList')
+      const $endGameElement = document.querySelector('.endGameElement')
+      const $restartBtn = document.querySelector('.restartBtn')
+      const $resetBtn = document.querySelector('.resetBtn')
+      const $startBtn = document.querySelector('.startBtn')
+      const $beforeGame = document.querySelector('.beforeGame')
+      const $game = document.querySelector('.game')
 
       let nowValue = 0
       let passedWords = []
       let words = []
+      let incorrectWords = []
       let fontSize = 200
       let currentWord = '단어'
 
@@ -57,6 +85,28 @@
         return `https://ja.dict.naver.com/search.nhn?dicQuery=${encodedWord}&query=${encodedWord}&target=dic&ie=utf8&query_utf=&isOnlyViewEE=`
       }
 
+      function gameStart(wordArray) {
+        const shuffled = shuffleArray(wordArray)
+        const passed = shuffled.slice().reverse()
+        passedWords = passed
+        words = shuffled
+        $total.textContent = words.length
+        $input.value = ''
+      }
+
+      function reset() {
+        nowValue = 0
+        passedWords = []
+        words = []
+        $wordElement.textContent = '단어'
+        $now.textContent = nowValue
+        $total.textContent = words.length
+        $incorrectList.textContent = ''
+        $endGameElement.style.display = 'none'
+        $beforeGame.style.display = 'block'
+        $game.style.display = 'none'
+      }
+
       function onSubmitForm(event) {
         event.preventDefault()
         const value = $input.value
@@ -65,32 +115,60 @@
         }
 
         const wordArray = value.split(',')
-        const shuffled = shuffleArray(wordArray)
-        console.log('shuffled', shuffled)
-        const passed = shuffled.slice().reverse()
-        console.log('passed', passed)
-        passedWords = passed
-        words = shuffled
-        $total.textContent = words.length
-        $input.value = ''
+        gameStart(wordArray)
       }
 
-      function onClickNextButton() {
-        if (nowValue >= words.length) {
-          alert('끝')
-          return
-        }
-
-        const word = words[nowValue]
+      function showNextWord(word) {
         $wordElement.textContent = word
         $link.href = getWordLink(word)
         nowValue += 1
         $now.textContent = nowValue
       }
 
+      function endGame() {
+        alert('끝')
+        $endGameElement.style.display = 'block'
+        let sentence = ''
+        if (incorrectWords.length === 0) {
+          sentence = '모두 맞았습니다!'
+        } else {
+          sentence = `오답 단어: ${incorrectWords.join(',')}`
+        }
+        $incorrectList.textContent = sentence
+      }
+
+      function onClickCorrectButton() {
+        if (nowValue >= words.length) {
+          endGame()
+          return
+        }
+
+        const word = words[nowValue]
+        showNextWord(word)
+      }
+
+      function onClickIncorrectButton() {
+        const currentWord = words[nowValue - 1]
+        incorrectWords.push(currentWord)
+
+        if (nowValue >= words.length) {
+          endGame()
+          return
+        }
+
+        console.log('incorrectWords', incorrectWords)
+        const word = words[nowValue]
+        showNextWord(word)
+      }
+
       function onClickBeforeButton() {
         if (nowValue <= 0) {
           return
+        }
+
+        const currentWordIndex = incorrectWords.indexOf(words[nowValue])
+        if (currentWordIndex !== -1) {
+          incorrectWords.splice(currentWordIndex, 1)
         }
         nowValue -= 1
         const word = passedWords[passedWords.length - nowValue]
@@ -99,14 +177,10 @@
         $now.textContent = nowValue
       }
 
-      function onClickPlusFontSizeButton() {
-        fontSize += 5
-        $wordElement.style.fontSize = `${fontSize}px`
-      }
-
-      function onClickMinusFontSizeButton() {
-        fontSize -= 5
-        $wordElement.style.fontSize = `${fontSize}px`
+      function onClickRestartButton() {
+        reset()
+        gameStart(incorrectWords)
+        incorrectWords = []
       }
 
       function onChangeFontSizeRange(event) {
@@ -116,8 +190,23 @@
 
       $beforeBtn.addEventListener('click', onClickBeforeButton)
       $form.addEventListener('submit', onSubmitForm)
-      $nextBtn.addEventListener('click', onClickNextButton)
+      $resetBtn.addEventListener('click', () => {
+        reset()
+        incorrectWords = []
+      })
+      $correctBtn.addEventListener('click', onClickCorrectButton)
+      $incorrectBtn.addEventListener('click', onClickIncorrectButton)
       $fontSizeRange.addEventListener('change', onChangeFontSizeRange)
+      $restartBtn.addEventListener('click', onClickRestartButton)
+      $startBtn.addEventListener('click', () => {
+        if (words.length === 0) {
+          alert('단어를 입력해주세요')
+          return
+        }
+        $beforeGame.style.display = 'none'
+        $game.style.display = 'block'
+        showNextWord(words[0])
+      })
     </script>
   </body>
 </html>
