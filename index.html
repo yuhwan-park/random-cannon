@@ -7,6 +7,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600&display=swap" rel="stylesheet" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=TAG_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+      gtag('js', new Date())
+
+      gtag('config', 'G-V5H1V9YVQ0')
+    </script>
     <title>랜덤 대포</title>
     <style>
       body {
@@ -18,8 +28,8 @@
       }
 
       button {
-        font-size : 70px;
-        margin : 0 20px;
+        font-size: 70px;
+        margin: 0 20px;
       }
     </style>
   </head>
@@ -118,7 +128,10 @@
         if (!value) {
           return
         }
-
+        gtag('event', 'form_submit', {
+          date: new Date().toLocaleString('ko'),
+          value: value,
+        })
         const wordArray = value.split(',')
         gameStart(wordArray)
       }
@@ -139,6 +152,10 @@
         } else {
           sentence = `오답 단어: ${incorrectWords.join(',')}`
         }
+        gtag('event', 'end_game', {
+          date: new Date().toLocaleString('ko'),
+          incorrectWords: incorrectWords.join(','),
+        })
         $incorrectList.textContent = sentence
       }
 
@@ -212,6 +229,10 @@
         $beforeGame.style.display = 'none'
         $game.style.display = 'block'
         showNextWord(words[0])
+      })
+
+      gtag('event', 'access', {
+        date: new Date().toLocaleString('ko'),
       })
     </script>
   </body>
